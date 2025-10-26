@@ -38,6 +38,11 @@
       "temperature": 1
     },
     {
+      "name": "grok-4-fast",
+      "model_id": "x-ai/grok-4-fast",
+      "temperature": 1
+    },
+    {
       "name": "deepseek 3.1",
       "model_id": "deepseek/deepseek-v3.1-terminus:exacto",
       "temperature": 1

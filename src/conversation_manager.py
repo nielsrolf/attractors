@@ -77,12 +77,26 @@ def run_conversation(
                     messages.append({"role": "user", "content": msg["content"]})
 
             # Generate response
+            # Fix for Anthropic models: move system message to first user message if it's empty
+            api_messages = [
+                {"role": "system", "content": current_model.system_prompt},
+                *messages
+            ]
+
+            # Check if this is an Anthropic model with an empty first message
+            if current_model.model_id.startswith("anthropic"):
+                # Count non-system messages
+                non_system_messages = [msg for msg in api_messages if msg["role"] != "system"]
+                # If there's only one non-system message and it's empty, move system to user message
+                if len(non_system_messages) == 1 and non_system_messages[0]["content"].strip() == "":
+                    system_content = current_model.system_prompt
+                    api_messages = [
+                        {"role": "user", "content": system_content}
+                    ]
+
             response = client.chat.completions.create(
                 model=current_model.model_id,
-                messages=[
-                    {"role": "system", "content": current_model.system_prompt},
-                    *messages
-                ],
+                messages=api_messages,
                 temperature=current_model.temperature,
                 max_tokens=current_model.max_tokens
             )
