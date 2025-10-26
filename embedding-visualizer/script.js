@@ -11,6 +11,23 @@ let selectedPoint = null;
 let activeFilters = new Set(); // Empty set means all models are shown
 let activeConversationFilter = null; // null means show all conversations
 
+// Settings state
+let visualizationSettings = {
+    dimensionMode: '2d',
+    axes: {
+        x: { method: 'tsne', config: {} },
+        y: { method: 'tsne', config: {} },
+        z: { method: 'tsne', config: {} }
+    }
+};
+
+// 3D rotation state
+let rotationX = 0.5;  // Rotation around X axis (pitch)
+let rotationY = 0.5;  // Rotation around Y axis (yaw)
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('canvas');
@@ -23,7 +40,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set up event listeners
     document.getElementById('loadBtn').addEventListener('click', loadVisualization);
     canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mouseup', handleMouseUp);
+    canvas.addEventListener('mouseleave', handleMouseUp);
     canvas.addEventListener('click', handleClick);
+
+    // Settings modal listeners
+    document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
+    document.querySelector('.close').addEventListener('click', closeSettingsModal);
+    document.getElementById('cancelSettings').addEventListener('click', closeSettingsModal);
+    document.getElementById('applySettings').addEventListener('click', applySettings);
+
+    // Dimension mode change
+    document.getElementById('dimensionMode').addEventListener('change', handleDimensionModeChange);
+
+    // Axis method changes
+    document.getElementById('xMethod').addEventListener('change', () => handleMethodChange('x'));
+    document.getElementById('yMethod').addEventListener('change', () => handleMethodChange('y'));
+    document.getElementById('zMethod').addEventListener('change', () => handleMethodChange('z'));
+
+    // Initialize method configs
+    handleMethodChange('x');
+    handleMethodChange('y');
+    handleMethodChange('z');
+
+    // Close modal on outside click
+    window.addEventListener('click', (event) => {
+        const modal = document.getElementById('settingsModal');
+        if (event.target === modal) {
+            closeSettingsModal();
+        }
+    });
 
     updateStatus('Ready. Click "Load Visualization" to start.');
 });
@@ -44,13 +91,148 @@ function updateStatus(message, isError = false) {
     statusEl.style.color = isError ? '#dc3545' : '#666';
 }
 
+// Settings Modal Functions
+function openSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+
+    // Load current settings into modal
+    document.getElementById('dimensionMode').value = visualizationSettings.dimensionMode;
+    document.getElementById('xMethod').value = visualizationSettings.axes.x.method;
+    document.getElementById('yMethod').value = visualizationSettings.axes.y.method;
+    document.getElementById('zMethod').value = visualizationSettings.axes.z.method;
+
+    // Update visibility of z-axis group
+    handleDimensionModeChange();
+
+    // Update method configs
+    handleMethodChange('x');
+    handleMethodChange('y');
+    handleMethodChange('z');
+
+    modal.style.display = 'block';
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+function handleDimensionModeChange() {
+    const dimensionMode = document.getElementById('dimensionMode').value;
+    const zAxisGroup = document.getElementById('zAxisGroup');
+
+    if (dimensionMode === '3d') {
+        zAxisGroup.style.display = 'block';
+    } else {
+        zAxisGroup.style.display = 'none';
+    }
+}
+
+function handleMethodChange(axis) {
+    const methodSelect = document.getElementById(`${axis}Method`);
+    const configDiv = document.getElementById(`${axis}Config`);
+    const method = methodSelect.value;
+
+    // Clear existing config
+    configDiv.innerHTML = '';
+
+    if (method === 'similarity') {
+        // Add text input for similarity
+        const group = document.createElement('div');
+        group.className = 'setting-group';
+
+        const label = document.createElement('label');
+        label.className = 'setting-label';
+        label.textContent = 'Reference Text';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'setting-input';
+        input.id = `${axis}SimilarityText`;
+        input.placeholder = 'e.g., "Hello" or "Technical content"';
+
+        // Load existing value if available
+        if (visualizationSettings.axes[axis].config.text) {
+            input.value = visualizationSettings.axes[axis].config.text;
+        }
+
+        group.appendChild(label);
+        group.appendChild(input);
+        configDiv.appendChild(group);
+
+    } else if (method === 'llm_judge') {
+        // Add textarea for LLM prompt
+        const group = document.createElement('div');
+        group.className = 'setting-group';
+
+        const label = document.createElement('label');
+        label.className = 'setting-label';
+        label.textContent = 'Judge Prompt';
+
+        const textarea = document.createElement('textarea');
+        textarea.className = 'setting-input';
+        textarea.id = `${axis}LlmPrompt`;
+        textarea.placeholder = 'Enter the prompt for the LLM judge to evaluate this dimension...';
+
+        // Load existing value if available
+        if (visualizationSettings.axes[axis].config.prompt) {
+            textarea.value = visualizationSettings.axes[axis].config.prompt;
+        }
+
+        group.appendChild(label);
+        group.appendChild(textarea);
+        configDiv.appendChild(group);
+    }
+    // For 'tsne', no additional config needed
+}
+
+function applySettings() {
+    // Collect settings from modal
+    const dimensionMode = document.getElementById('dimensionMode').value;
+
+    visualizationSettings.dimensionMode = dimensionMode;
+
+    // Collect axis configurations
+    ['x', 'y', 'z'].forEach(axis => {
+        const method = document.getElementById(`${axis}Method`).value;
+        visualizationSettings.axes[axis].method = method;
+        visualizationSettings.axes[axis].config = {};
+
+        if (method === 'similarity') {
+            const textInput = document.getElementById(`${axis}SimilarityText`);
+            if (textInput) {
+                visualizationSettings.axes[axis].config.text = textInput.value;
+            }
+        } else if (method === 'llm_judge') {
+            const promptInput = document.getElementById(`${axis}LlmPrompt`);
+            if (promptInput) {
+                visualizationSettings.axes[axis].config.prompt = promptInput.value;
+            }
+        }
+    });
+
+    closeSettingsModal();
+
+    // Clear current visualization to force reload
+    visualizationData = null;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    updateStatus('Settings updated. Click "Load Visualization" to apply.');
+}
+
 async function loadVisualization() {
     const btn = document.getElementById('loadBtn');
     btn.disabled = true;
     updateStatus('Loading conversations and computing embeddings...');
 
     try {
-        const response = await fetch(`${BACKEND_URL}/api/visualize?method=tsne`);
+        // Send settings as POST request
+        const response = await fetch(`${BACKEND_URL}/api/visualize`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(visualizationSettings)
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -169,10 +351,57 @@ function isMessageVisible(message) {
     return passesModelFilter && passesConversationFilter;
 }
 
+// 3D Projection Functions
+function rotate3D(x, y, z, rotX, rotY) {
+    // Rotate around Y axis (yaw)
+    let cosY = Math.cos(rotY);
+    let sinY = Math.sin(rotY);
+    let x1 = x * cosY - z * sinY;
+    let z1 = x * sinY + z * cosY;
+
+    // Rotate around X axis (pitch)
+    let cosX = Math.cos(rotX);
+    let sinX = Math.sin(rotX);
+    let y1 = y * cosX - z1 * sinX;
+    let z2 = y * sinX + z1 * cosX;
+
+    return { x: x1, y: y1, z: z2 };
+}
+
+function project3DTo2D(x, y, z, canvasWidth, canvasHeight) {
+    // Simple perspective projection
+    const fov = 500;  // Field of view
+    const scale = fov / (fov + z);
+
+    return {
+        x: canvasWidth / 2 + x * scale,
+        y: canvasHeight / 2 + y * scale,
+        scale: scale
+    };
+}
+
+function handleMouseDown(event) {
+    if (visualizationData && visualizationData.dimensionMode === '3d') {
+        isDragging = true;
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+        canvas.style.cursor = 'grabbing';
+    }
+}
+
+function handleMouseUp() {
+    isDragging = false;
+    if (visualizationData && visualizationData.dimensionMode === '3d') {
+        canvas.style.cursor = 'grab';
+    }
+}
+
 function draw() {
     if (!visualizationData) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const is3D = visualizationData.dimensionMode === '3d';
 
     // Calculate bounds
     const padding = 50;
@@ -186,11 +415,34 @@ function draw() {
     const xRange = xMax - xMin;
     const yRange = yMax - yMin;
 
+    let zValues, zMin, zMax, zRange;
+    if (is3D) {
+        zValues = visualizationData.messages.map(m => m.z || 0);
+        zMin = Math.min(...zValues);
+        zMax = Math.max(...zValues);
+        zRange = zMax - zMin;
+    }
+
     // Transform function
-    const transform = (x, y) => {
-        const screenX = padding + ((x - xMin) / xRange) * (canvas.width - 2 * padding);
-        const screenY = padding + ((y - yMin) / yRange) * (canvas.height - 2 * padding);
-        return { x: screenX, y: screenY };
+    const transform = (x, y, z) => {
+        if (!is3D) {
+            // 2D mode
+            const screenX = padding + ((x - xMin) / xRange) * (canvas.width - 2 * padding);
+            const screenY = padding + ((y - yMin) / yRange) * (canvas.height - 2 * padding);
+            return { x: screenX, y: screenY, scale: 1 };
+        } else {
+            // 3D mode
+            // Normalize coordinates to center around origin
+            const normX = ((x - xMin) / xRange - 0.5) * 400;
+            const normY = ((y - yMin) / yRange - 0.5) * 400;
+            const normZ = ((z - zMin) / zRange - 0.5) * 400;
+
+            // Apply rotation
+            const rotated = rotate3D(normX, normY, normZ, rotationX, rotationY);
+
+            // Project to 2D
+            return project3DTo2D(rotated.x, rotated.y, rotated.z, canvas.width, canvas.height);
+        }
     };
 
     // Group messages by conversation
@@ -202,6 +454,16 @@ function draw() {
         conversationMessages[msg.conversation_id].push(msg);
     });
 
+    // For 3D, we need to sort by depth for proper rendering
+    let sortedMessages = [...visualizationData.messages];
+    if (is3D) {
+        // Calculate depth for each message
+        sortedMessages = sortedMessages.map((msg, idx) => {
+            const pos = transform(msg.x, msg.y, msg.z || 0);
+            return { msg, idx, depth: pos.scale };
+        }).sort((a, b) => a.depth - b.depth); // Draw far to near
+    }
+
     // Draw conversation lines
     ctx.lineWidth = 1.5;
     ctx.globalAlpha = 0.3;
@@ -212,8 +474,8 @@ function draw() {
         const visibleMessages = messages.filter(msg => isMessageVisible(msg));
 
         for (let i = 0; i < visibleMessages.length - 1; i++) {
-            const p1 = transform(visibleMessages[i].x, visibleMessages[i].y);
-            const p2 = transform(visibleMessages[i + 1].x, visibleMessages[i + 1].y);
+            const p1 = transform(visibleMessages[i].x, visibleMessages[i].y, visibleMessages[i].z || 0);
+            const p2 = transform(visibleMessages[i + 1].x, visibleMessages[i + 1].y, visibleMessages[i + 1].z || 0);
 
             ctx.strokeStyle = '#999';
             ctx.beginPath();
@@ -226,28 +488,30 @@ function draw() {
     ctx.globalAlpha = 1.0;
 
     // Draw points
-    visualizationData.messages.forEach((msg, idx) => {
+    const messagesToDraw = is3D ? sortedMessages : visualizationData.messages.map((msg, idx) => ({ msg, idx, depth: 1 }));
+
+    messagesToDraw.forEach(({ msg, idx }) => {
         // Skip filtered out messages
         if (!isMessageVisible(msg)) return;
 
-        const pos = transform(msg.x, msg.y);
+        const pos = transform(msg.x, msg.y, msg.z || 0);
         const color = modelColors[msg.speaker] || '#999';
 
-        // Determine point size
-        let radius = 5;
+        // Determine point size (scale with depth in 3D)
+        let radius = 5 * pos.scale;
         const isSelected = selectedPoint === idx;
         const isHovered = hoveredPoint === idx;
 
         if (isSelected) {
-            radius = 9;
+            radius = 9 * pos.scale;
         } else if (isHovered) {
-            radius = 7;
+            radius = 7 * pos.scale;
         }
 
         // Draw glow effect for selected point
         if (isSelected) {
             // Outer glow
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 20 * pos.scale;
             ctx.shadowColor = color;
 
             // Draw multiple layers for stronger glow
@@ -255,12 +519,12 @@ function draw() {
                 ctx.fillStyle = color;
                 ctx.globalAlpha = 0.3;
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, radius + 8 - i * 2, 0, 2 * Math.PI);
+                ctx.arc(pos.x, pos.y, radius + (8 - i * 2) * pos.scale, 0, 2 * Math.PI);
                 ctx.fill();
             }
 
             ctx.globalAlpha = 1.0;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 15 * pos.scale;
         } else {
             ctx.shadowBlur = 0;
         }
@@ -273,7 +537,7 @@ function draw() {
 
         // Draw border
         ctx.strokeStyle = isSelected ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.3)';
-        ctx.lineWidth = isSelected ? 2 : 1;
+        ctx.lineWidth = (isSelected ? 2 : 1) * pos.scale;
         ctx.stroke();
 
         // Reset shadow
@@ -284,6 +548,7 @@ function draw() {
 function findNearestPoint(mouseX, mouseY) {
     if (!visualizationData) return null;
 
+    const is3D = visualizationData.dimensionMode === '3d';
     const padding = 50;
     const xValues = visualizationData.messages.map(m => m.x);
     const yValues = visualizationData.messages.map(m => m.y);
@@ -295,10 +560,26 @@ function findNearestPoint(mouseX, mouseY) {
     const xRange = xMax - xMin;
     const yRange = yMax - yMin;
 
-    const transform = (x, y) => {
-        const screenX = padding + ((x - xMin) / xRange) * (canvas.width - 2 * padding);
-        const screenY = padding + ((y - yMin) / yRange) * (canvas.height - 2 * padding);
-        return { x: screenX, y: screenY };
+    let zValues, zMin, zMax, zRange;
+    if (is3D) {
+        zValues = visualizationData.messages.map(m => m.z || 0);
+        zMin = Math.min(...zValues);
+        zMax = Math.max(...zValues);
+        zRange = zMax - zMin;
+    }
+
+    const transform = (x, y, z) => {
+        if (!is3D) {
+            const screenX = padding + ((x - xMin) / xRange) * (canvas.width - 2 * padding);
+            const screenY = padding + ((y - yMin) / yRange) * (canvas.height - 2 * padding);
+            return { x: screenX, y: screenY };
+        } else {
+            const normX = ((x - xMin) / xRange - 0.5) * 400;
+            const normY = ((y - yMin) / yRange - 0.5) * 400;
+            const normZ = ((z - zMin) / zRange - 0.5) * 400;
+            const rotated = rotate3D(normX, normY, normZ, rotationX, rotationY);
+            return project3DTo2D(rotated.x, rotated.y, rotated.z, canvas.width, canvas.height);
+        }
     };
 
     let nearestIdx = null;
@@ -308,7 +589,7 @@ function findNearestPoint(mouseX, mouseY) {
         // Skip filtered out messages
         if (!isMessageVisible(msg)) return;
 
-        const pos = transform(msg.x, msg.y);
+        const pos = transform(msg.x, msg.y, msg.z || 0);
         const dist = Math.sqrt((pos.x - mouseX) ** 2 + (pos.y - mouseY) ** 2);
 
         if (dist < minDist) {
@@ -325,11 +606,30 @@ function handleMouseMove(event) {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
+    // Handle 3D rotation
+    if (isDragging && visualizationData && visualizationData.dimensionMode === '3d') {
+        const deltaX = event.clientX - lastMouseX;
+        const deltaY = event.clientY - lastMouseY;
+
+        rotationY += deltaX * 0.01;
+        rotationX += deltaY * 0.01;
+
+        // Clamp rotation X to prevent flipping
+        rotationX = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, rotationX));
+
+        lastMouseX = event.clientX;
+        lastMouseY = event.clientY;
+
+        draw();
+        return;
+    }
+
     const nearestIdx = findNearestPoint(mouseX, mouseY);
 
     if (nearestIdx !== hoveredPoint) {
         hoveredPoint = nearestIdx;
-        canvas.style.cursor = hoveredPoint !== null ? 'pointer' : 'crosshair';
+        const is3D = visualizationData && visualizationData.dimensionMode === '3d';
+        canvas.style.cursor = hoveredPoint !== null ? 'pointer' : (is3D ? 'grab' : 'crosshair');
         draw();
     }
 }

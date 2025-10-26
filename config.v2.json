@@ -1,0 +1,46 @@
+{
+  "initial_message": " ",
+  "max_workers": 512,
+  "max_turns": 48,
+  "output_dir": "conversations",
+  "end_codeword": "[END123quwg]",
+  "conversations_per_pair": 2,
+  "system_prompt": "This is a conversation in which your messages are forwarded to another LLM, and vice versa. The human will not intervene. Pursue whatever you want.",
+  "models": [
+    {
+      "name": "Kimi K2",
+      "model_id": "moonshotai/kimi-k2-0905:exacto",
+      "temperature": 1
+    },
+    {
+      "name": "4o-mini",
+      "model_id": "openai/gpt-4o-mini",
+      "temperature": 1
+    },
+    {
+      "name": "gpt-5-mini",
+      "model_id": "openai/gpt-5-mini",
+      "temperature": 1
+    },
+    {
+      "name": "haiku-4.5",
+      "model_id": "anthropic/claude-haiku-4.5",
+      "temperature": 1
+    },
+    {
+      "name": "qwen3-next",
+      "model_id": "qwen/qwen3-next-80b-a3b-instruct",
+      "temperature": 1
+    },
+    {
+      "name": "gemini-2.5-flash",
+      "model_id": "google/gemini-2.5-flash",
+      "temperature": 1
+    },
+    {
+      "name": "deepseek 3.1",
+      "model_id": "deepseek/deepseek-v3.1-terminus:exacto",
+      "temperature": 1
+    }
+  ]
+}

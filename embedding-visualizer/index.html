@@ -12,6 +12,7 @@
             <h1>Conversation Embeddings Visualizer</h1>
             <div class="controls">
                 <button id="loadBtn" class="btn">Load Visualization</button>
+                <button id="settingsBtn" class="btn btn-secondary">Settings</button>
                 <div class="status" id="status">Ready</div>
             </div>
         </header>
@@ -25,6 +26,70 @@
             <h3>Conversation</h3>
             <p class="placeholder">Click on a message point to see the full conversation</p>
             <div id="conversationContent" class="conversation-content"></div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Visualization Settings</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label class="setting-label">Dimensions</label>
+                    <select id="dimensionMode" class="setting-input">
+                        <option value="2d">2D</option>
+                        <option value="3d">3D</option>
+                    </select>
+                </div>
+
+                <div class="axis-settings">
+                    <div class="axis-group">
+                        <h3>X-Axis</h3>
+                        <div class="setting-group">
+                            <label class="setting-label">Method</label>
+                            <select id="xMethod" class="setting-input axis-method">
+                                <option value="tsne">t-SNE</option>
+                                <option value="similarity">Similarity to Text</option>
+                                <option value="llm_judge">LLM Judge</option>
+                            </select>
+                        </div>
+                        <div id="xConfig" class="method-config"></div>
+                    </div>
+
+                    <div class="axis-group">
+                        <h3>Y-Axis</h3>
+                        <div class="setting-group">
+                            <label class="setting-label">Method</label>
+                            <select id="yMethod" class="setting-input axis-method">
+                                <option value="tsne">t-SNE</option>
+                                <option value="similarity">Similarity to Text</option>
+                                <option value="llm_judge">LLM Judge</option>
+                            </select>
+                        </div>
+                        <div id="yConfig" class="method-config"></div>
+                    </div>
+
+                    <div class="axis-group" id="zAxisGroup" style="display: none;">
+                        <h3>Z-Axis</h3>
+                        <div class="setting-group">
+                            <label class="setting-label">Method</label>
+                            <select id="zMethod" class="setting-input axis-method">
+                                <option value="tsne">t-SNE</option>
+                                <option value="similarity">Similarity to Text</option>
+                                <option value="llm_judge">LLM Judge</option>
+                            </select>
+                        </div>
+                        <div id="zConfig" class="method-config"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="applySettings" class="btn">Apply Settings</button>
+                <button id="cancelSettings" class="btn btn-secondary">Cancel</button>
+            </div>
         </div>
     </div>
 
