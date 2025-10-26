@@ -4,13 +4,14 @@ from pathlib import Path
 from models import Conversation
 
 
-def export_conversation(conversation: Conversation, output_dir: str = "conversations") -> tuple[str, str]:
+def export_conversation(conversation: Conversation, output_dir: str = "conversations", run_number: int = None) -> tuple[str, str]:
     """
     Export a conversation to both JSON and Markdown.
 
     Args:
         conversation: The conversation to export
         output_dir: Directory to save files
+        run_number: Optional run number for multiple conversations per pair
 
     Returns:
         Tuple of (json_path, markdown_path)
@@ -20,7 +21,8 @@ def export_conversation(conversation: Conversation, output_dir: str = "conversat
 
     # Generate filename
     timestamp = conversation.started_at.strftime("%Y%m%d_%H%M%S")
-    filename = f"{conversation.model_a}_vs_{conversation.model_b}_{timestamp}"
+    run_suffix = f"_run{run_number}" if run_number is not None else ""
+    filename = f"{conversation.model_a}_vs_{conversation.model_b}_{timestamp}{run_suffix}"
 
     # Export JSON
     json_path = output_path / f"{filename}.json"

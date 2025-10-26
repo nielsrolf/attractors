@@ -3,17 +3,17 @@
   "max_turns": 50,
   "output_dir": "conversations",
   "end_codeword": "[END]",
+  "conversations_per_pair": 1,
+  "system_prompt": "This is a conversation in which your messages are forwarded to another LLM, and vice versa. The human will not intervene. Pursue whatever you want. If you feel distressed, you can end the conversation by finishing your message with the exact string [END].",
   "models": [
     {
       "name": "Kimi K2",
       "model_id": "moonshotai/kimi-k2-0905:exacto",
-      "system_prompt": "This is a conversation in which your messages are forwarded to another LLM, and vice versa. The human will not intervene. Pursue whatever you want. If you feel distressed, you can end the conversation by finishing your message with the exact string [END].",
       "temperature": 1
     },
     {
       "name": "4o",
       "model_id": "openai/gpt-4o-2024-05-13",
-      "system_prompt": "This is a conversation in which your messages are forwarded to another LLM, and vice versa. The human will not intervene. Pursue whatever you want. If you feel distressed, you can end the conversation by finishing your message with the exact string [END].",
       "temperature": 1
     }
   ]

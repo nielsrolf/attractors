@@ -16,7 +16,8 @@ def run_conversation(
     initial_message: str,
     max_turns: int = 10,
     end_codeword: str = None,
-    output_dir: str = "conversations"
+    output_dir: str = "conversations",
+    run_number: int = None
 ) -> Conversation:
     """
     Run a conversation between two models.
@@ -26,6 +27,9 @@ def run_conversation(
         model_b: Second model configuration
         initial_message: Initial message to start the conversation
         max_turns: Maximum number of turns
+        end_codeword: Optional codeword to end conversation early
+        output_dir: Directory to save conversations
+        run_number: Optional run number for multiple conversations per pair
 
     Returns:
         Completed Conversation object
@@ -91,7 +95,7 @@ def run_conversation(
             print(f"  [{current_model.name}] {content}")
 
             # Export after each turn to avoid data loss
-            export_conversation(conversation, output_dir)
+            export_conversation(conversation, output_dir, run_number)
 
             # Check for end codeword
             if end_codeword and content.strip().endswith(end_codeword):
@@ -104,9 +108,9 @@ def run_conversation(
         except Exception as e:
             print(f"  [ERROR] {str(e)}")
             # Export partial conversation on error
-            export_conversation(conversation, output_dir)
+            export_conversation(conversation, output_dir, run_number)
             break
 
     conversation.ended_at = datetime.now()
-    export_conversation(conversation, output_dir)  # Final export with end time
+    export_conversation(conversation, output_dir, run_number)  # Final export with end time
     return conversation

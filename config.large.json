@@ -2,53 +2,47 @@
   "initial_message": " ",
   "max_turns": 6,
   "output_dir": "conversations",
+  "conversations_per_pair": 1,
+  "system_prompt": "",
   "models": [
     {
       "name": "Kimi K2",
       "model_id": "moonshotai/kimi-k2-0905:exacto",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "4o",
       "model_id": "openai/gpt-4o-2024-05-13",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "gpt-5",
       "model_id": "openai/gpt-5",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "grok-4",
       "model_id": "x-ai/grok-4",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "sonnet-4.5",
       "model_id": "anthropic/claude-sonnet-4.5",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "qwen3-next",
       "model_id": "qwen/qwen3-next-80b-a3b-instruct",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "gemini-2.5-flash",
       "model_id": "google/gemini-2.5-flash",
-      "system_prompt": "",
       "temperature": 1
     },
     {
       "name": "deepseek 3.1",
       "model_id": "deepseek/deepseek-v3.1-terminus:exacto",
-      "system_prompt": "",
       "temperature": 1
     }
   ]

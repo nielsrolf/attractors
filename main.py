@@ -23,12 +23,15 @@ def main():
     with open(sys.argv[1]) as f:
         config = json.load(f)
 
+    # Get shared system prompt (with fallback for backwards compatibility)
+    shared_system_prompt = config.get("system_prompt", "")
+
     # Create model configs
     models = [
         ModelConfig(
             name=m["name"],
             model_id=m["model_id"],
-            system_prompt=m["system_prompt"],
+            system_prompt=m.get("system_prompt", shared_system_prompt),
             temperature=m.get("temperature", 0.7),
             max_tokens=m.get("max_tokens")
         )
@@ -41,7 +44,8 @@ def main():
         initial_message=config["initial_message"],
         max_turns=config.get("max_turns", 10),
         output_dir=config.get("output_dir", "conversations"),
-        end_codeword=config.get("end_codeword")
+        end_codeword=config.get("end_codeword"),
+        conversations_per_pair=config.get("conversations_per_pair", 1)
     )
 
 
