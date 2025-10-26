@@ -1,0 +1,14 @@
+{
+  "model_a": "4o",
+  "model_b": "sonnet-4.5",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "4o"
+    }
+  ],
+  "started_at": "2025-10-26T13:08:38.851995",
+  "ended_at": "2025-10-26T13:08:45.373200"
+}

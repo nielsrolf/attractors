@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+scikit-learn
+numpy
+openai
+cache_on_disk

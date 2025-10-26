@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversation Embeddings Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Conversation Embeddings Visualizer</h1>
+            <div class="controls">
+                <button id="loadBtn" class="btn">Load Visualization</button>
+                <div class="status" id="status">Ready</div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="visualization-container">
+                <canvas id="canvas"></canvas>
+                <div class="legend" id="legend"></div>
+            </div>
+
+            <div class="message-details" id="messageDetails">
+                <h3>Message Details</h3>
+                <p class="placeholder">Click on a message point to see its content</p>
+                <div id="messageContent" class="message-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
