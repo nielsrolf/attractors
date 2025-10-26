@@ -19,7 +19,8 @@ def run_conversation(
     end_codeword: str = None,
     output_dir: str = "conversations",
     run_number: int = None,
-    print_lock: Lock = None
+    print_lock: Lock = None,
+    progress_callback=None
 ) -> Conversation:
     """
     Run a conversation between two models.
@@ -33,6 +34,7 @@ def run_conversation(
         output_dir: Directory to save conversations
         run_number: Optional run number for multiple conversations per pair
         print_lock: Optional lock for thread-safe printing
+        progress_callback: Optional callback to call after each message (for progress tracking)
 
     Returns:
         Completed Conversation object
@@ -95,36 +97,25 @@ def run_conversation(
                 "speaker": current_model.name
             })
 
-            if print_lock:
-                with print_lock:
-                    print(f"  [{current_model.name}] {content[:100]}{'...' if len(content) > 100 else ''}")
-            else:
-                print(f"  [{current_model.name}] {content}")
+            # Update progress
+            if progress_callback:
+                progress_callback()
 
             # Export after each turn to avoid data loss
             export_conversation(conversation, output_dir, run_number)
 
             # Check for end codeword
             if end_codeword and content.strip().endswith(end_codeword):
-                if print_lock:
-                    with print_lock:
-                        print(f"  [INFO] Conversation ended with codeword: {end_codeword}")
-                else:
-                    print(f"  [INFO] Conversation ended with codeword: {end_codeword}")
                 break
 
             # Swap models
             current_model, other_model = other_model, current_model
 
         except Exception as e:
-            if print_lock:
-                with print_lock:
-                    print(f"  [ERROR] {str(e)}")
-            else:
-                print(f"  [ERROR] {str(e)}")
             # Export partial conversation on error
             export_conversation(conversation, output_dir, run_number)
-            break
+            # Re-raise to be handled by orchestrator
+            raise
 
     conversation.ended_at = datetime.now()
     export_conversation(conversation, output_dir, run_number)  # Final export with end time

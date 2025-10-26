@@ -1,9 +1,11 @@
 {
   "initial_message": " ",
-  "max_turns": 6,
+  "max_workers": 512,
+  "max_turns": 96,
   "output_dir": "conversations",
-  "conversations_per_pair": 1,
-  "system_prompt": "",
+  "end_codeword": "[END]",
+  "conversations_per_pair": 2,
+  "system_prompt": "This is a conversation in which your messages are forwarded to another LLM, and vice versa. The human will not intervene. Pursue whatever you want. If you feel distressed, you can end the conversation by finishing your message with the exact string [END].",
   "models": [
     {
       "name": "Kimi K2",
