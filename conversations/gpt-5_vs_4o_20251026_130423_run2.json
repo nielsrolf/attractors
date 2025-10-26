@@ -1,0 +1,19 @@
+{
+  "model_a": "gpt-5",
+  "model_b": "4o",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "gpt-5"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! How can I assist you today?",
+      "speaker": "4o"
+    }
+  ],
+  "started_at": "2025-10-26T13:04:23.132700",
+  "ended_at": null
+}

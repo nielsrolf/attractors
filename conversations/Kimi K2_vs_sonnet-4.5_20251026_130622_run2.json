@@ -1,0 +1,14 @@
+{
+  "model_a": "Kimi K2",
+  "model_b": "sonnet-4.5",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "Kimi K2"
+    }
+  ],
+  "started_at": "2025-10-26T13:06:22.204523",
+  "ended_at": "2025-10-26T13:06:29.573376"
+}

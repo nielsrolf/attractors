@@ -1,0 +1,19 @@
+{
+  "model_a": "4o",
+  "model_b": "deepseek 3.1",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "4o"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I'm ready to chat. What would you like to talk about today?",
+      "speaker": "deepseek 3.1"
+    }
+  ],
+  "started_at": "2025-10-26T13:06:22.285386",
+  "ended_at": "2025-10-26T13:06:29.175325"
+}

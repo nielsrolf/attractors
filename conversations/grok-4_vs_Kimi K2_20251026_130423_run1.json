@@ -1,0 +1,19 @@
+{
+  "model_a": "grok-4",
+  "model_b": "Kimi K2",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "grok-4"
+    },
+    {
+      "role": "assistant",
+      "content": "[END]",
+      "speaker": "Kimi K2"
+    }
+  ],
+  "started_at": "2025-10-26T13:04:23.114916",
+  "ended_at": null
+}

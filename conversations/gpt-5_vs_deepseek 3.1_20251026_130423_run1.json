@@ -1,0 +1,19 @@
+{
+  "model_a": "gpt-5",
+  "model_b": "deepseek 3.1",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "gpt-5"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I'm ready to chat. What would you like to talk about today?",
+      "speaker": "deepseek 3.1"
+    }
+  ],
+  "started_at": "2025-10-26T13:04:23.143410",
+  "ended_at": null
+}

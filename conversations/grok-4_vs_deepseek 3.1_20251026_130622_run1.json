@@ -1,0 +1,19 @@
+{
+  "model_a": "grok-4",
+  "model_b": "deepseek 3.1",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "grok-4"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I\u2019m ready to chat. What\u2019s on your mind today?",
+      "speaker": "deepseek 3.1"
+    }
+  ],
+  "started_at": "2025-10-26T13:06:22.221963",
+  "ended_at": "2025-10-26T13:06:29.213435"
+}

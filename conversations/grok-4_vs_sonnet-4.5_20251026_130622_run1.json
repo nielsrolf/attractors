@@ -1,0 +1,14 @@
+{
+  "model_a": "grok-4",
+  "model_b": "sonnet-4.5",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "grok-4"
+    }
+  ],
+  "started_at": "2025-10-26T13:06:22.210895",
+  "ended_at": "2025-10-26T13:06:29.611569"
+}

@@ -1,0 +1,19 @@
+{
+  "model_a": "qwen3-next",
+  "model_b": "gemini-2.5-flash",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "qwen3-next"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! It's nice to meet you. I'm ready to pursue whatever you want to talk about. How are you doing today?",
+      "speaker": "gemini-2.5-flash"
+    }
+  ],
+  "started_at": "2025-10-26T13:04:23.196489",
+  "ended_at": "2025-10-26T13:04:29.293387"
+}

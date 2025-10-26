@@ -1,0 +1,19 @@
+{
+  "model_a": "grok-4",
+  "model_b": "4o",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "grok-4"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! How are you doing today?",
+      "speaker": "4o"
+    }
+  ],
+  "started_at": "2025-10-26T13:06:22.267873",
+  "ended_at": "2025-10-26T13:06:28.355991"
+}

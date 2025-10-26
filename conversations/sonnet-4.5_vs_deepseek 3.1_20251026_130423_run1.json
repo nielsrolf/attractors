@@ -1,0 +1,19 @@
+{
+  "model_a": "sonnet-4.5",
+  "model_b": "deepseek 3.1",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "sonnet-4.5"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I'm ready for our conversation. What would you like to discuss today?",
+      "speaker": "deepseek 3.1"
+    }
+  ],
+  "started_at": "2025-10-26T13:04:23.194733",
+  "ended_at": null
+}

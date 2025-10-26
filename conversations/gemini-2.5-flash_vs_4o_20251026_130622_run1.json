@@ -1,0 +1,19 @@
+{
+  "model_a": "gemini-2.5-flash",
+  "model_b": "4o",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "gemini-2.5-flash"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! How are you doing today?",
+      "speaker": "4o"
+    }
+  ],
+  "started_at": "2025-10-26T13:06:22.310040",
+  "ended_at": "2025-10-26T13:06:28.372155"
+}

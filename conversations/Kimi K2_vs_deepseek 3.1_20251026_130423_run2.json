@@ -1,0 +1,19 @@
+{
+  "model_a": "Kimi K2",
+  "model_b": "deepseek 3.1",
+  "initial_message": " ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " ",
+      "speaker": "Kimi K2"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello there! I'm ready to chat. What's on your mind today?",
+      "speaker": "deepseek 3.1"
+    }
+  ],
+  "started_at": "2025-10-26T13:04:23.162464",
+  "ended_at": null
+}
