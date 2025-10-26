@@ -60,13 +60,6 @@ h1 {
     color: #666;
 }
 
-.main-content {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 20px;
-    height: calc(100vh - 180px);
-}
-
 .visualization-container {
     background: white;
     border-radius: 8px;
@@ -74,6 +67,8 @@ h1 {
     padding: 20px;
     position: relative;
     overflow: hidden;
+    height: 500px;
+    margin-bottom: 20px;
 }
 
 #canvas {
@@ -141,17 +136,26 @@ h1 {
     white-space: nowrap;
 }
 
-.message-details {
+.conversation-view {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 20px;
+    max-height: 600px;
     overflow-y: auto;
+    position: relative;
 }
 
-.message-details h3 {
+.conversation-view h3 {
     font-size: 18px;
     margin-bottom: 15px;
+    position: sticky;
+    top: -20px;
+    background: white;
+    padding: 20px 0 10px 0;
+    margin: -20px 0 15px 0;
+    border-bottom: 1px solid #eee;
+    z-index: 10;
 }
 
 .placeholder {
@@ -159,30 +163,64 @@ h1 {
     font-style: italic;
 }
 
-.message-content {
+.conversation-content {
     display: none;
 }
 
-.message-content.active {
+.conversation-content.active {
     display: block;
 }
 
-.message-field {
-    margin-bottom: 10px;
+.conversation-message {
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
-.message-field-label {
-    font-weight: 500;
+.conversation-message:hover {
+    background: #e9ecef;
+    transform: translateX(2px);
+}
+
+.conversation-message.selected {
+    border-color: #007bff;
+    background: #e7f3ff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+}
+
+.conversation-message.filtered-out {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.conversation-message.filtered-out:hover {
+    background: #f8f9fa;
+    transform: none;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.message-index {
     font-size: 11px;
     color: #666;
-    margin-bottom: 6px;
+    font-weight: 500;
 }
 
-.message-field-value {
+.message-text {
     font-size: 13px;
     line-height: 1.5;
     white-space: pre-wrap;
     word-wrap: break-word;
+    color: #333;
 }
 
 .speaker-badge {
@@ -194,17 +232,24 @@ h1 {
     color: white;
 }
 
-.message-actions {
+.conversation-actions {
     display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding: 8px 0 12px 0;
     border-bottom: 1px solid #eee;
+    align-items: center;
+    position: sticky;
+    top: 44px;
+    background: white;
+    z-index: 9;
 }
 
-.message-nav-buttons {
-    display: flex;
-    gap: 4px;
+.conversation-title {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    flex: 1;
 }
 
 .btn-small {
@@ -244,8 +289,11 @@ h1 {
 }
 
 @media (max-width: 1024px) {
-    .main-content {
-        grid-template-columns: 1fr;
-        grid-template-rows: 500px 1fr;
+    .visualization-container {
+        height: 400px;
+    }
+
+    .conversation-view {
+        max-height: 400px;
     }
 }

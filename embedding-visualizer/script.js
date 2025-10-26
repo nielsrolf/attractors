@@ -147,13 +147,16 @@ function handleFilterChange(event) {
         updateLegend();
     }
 
-    // Reset selection if filtered out
+    // Update conversation view if a message is selected
     if (selectedPoint !== null) {
         const selectedMsg = visualizationData.messages[selectedPoint];
         if (!isMessageVisible(selectedMsg)) {
             selectedPoint = null;
             document.querySelector('.placeholder').style.display = 'block';
-            document.getElementById('messageContent').classList.remove('active');
+            document.getElementById('conversationContent').classList.remove('active');
+        } else {
+            // Refresh the conversation view to show filtered state
+            showConversation(selectedMsg.conversation_id);
         }
     }
 
@@ -339,70 +342,103 @@ function handleClick(event) {
     const nearestIdx = findNearestPoint(mouseX, mouseY);
 
     if (nearestIdx !== null) {
-        selectedPoint = nearestIdx;
-        showMessageDetails(visualizationData.messages[nearestIdx]);
-        draw();
+        selectMessage(nearestIdx);
     }
 }
 
-function showMessageDetails(message) {
+function selectMessage(messageIdx) {
+    selectedPoint = messageIdx;
+    const message = visualizationData.messages[messageIdx];
+
+    showConversation(message.conversation_id);
+    draw();
+}
+
+function showConversation(conversationId) {
     const placeholder = document.querySelector('.placeholder');
-    const messageContent = document.getElementById('messageContent');
+    const conversationContent = document.getElementById('conversationContent');
 
     placeholder.style.display = 'none';
-    messageContent.classList.add('active');
+    conversationContent.classList.add('active');
 
-    const color = modelColors[message.speaker] || '#999';
+    const conversationMessages = getConversationMessages(conversationId);
 
-    // Get navigation info
-    const conversationMessages = getConversationMessages(message.conversation_id);
-    const currentIndex = conversationMessages.findIndex(m =>
-        m.message_index === message.message_index && m.speaker === message.speaker
-    );
-    const hasPrev = currentIndex > 0;
-    const hasNext = currentIndex < conversationMessages.length - 1;
+    // Get conversation info
+    const conversation = visualizationData.conversations.find(c => c.id === conversationId);
+    const conversationName = conversation ? `${conversation.model_a} vs ${conversation.model_b}` : conversationId;
 
-    messageContent.innerHTML = `
-        <div class="message-actions">
-            ${activeConversationFilter === message.conversation_id ? `
+    let html = `
+        <div class="conversation-actions">
+            <div class="conversation-title">${conversationName}</div>
+            ${activeConversationFilter === conversationId ? `
                 <button class="btn-small btn-primary" onclick="showAllConversations()">
-                    Show all
+                    Show all conversations
                 </button>
             ` : `
-                <button class="btn-small btn-primary" onclick="showOnlyConversation('${message.conversation_id}')">
-                    Only this
+                <button class="btn-small btn-primary" onclick="showOnlyConversation('${conversationId}')">
+                    Only this conversation
                 </button>
             `}
-            <div class="message-nav-buttons">
-                <button class="btn-small" id="prevMsgBtn" ${!hasPrev ? 'disabled' : ''}>
-                    ← Prev
-                </button>
-                <button class="btn-small" id="nextMsgBtn" ${!hasNext ? 'disabled' : ''}>
-                    Next →
-                </button>
-            </div>
-        </div>
-        <div class="message-field">
-            <div class="message-field-label">
-                <span class="speaker-badge" style="background-color: ${color};">
-                    ${message.speaker}
-                </span>
-                &nbsp;• Message ${message.message_index + 1}/${conversationMessages.length}
-            </div>
-            <div class="message-field-value">${escapeHtml(message.text)}</div>
         </div>
     `;
 
-    // Add event listeners for navigation buttons
-    const prevBtn = document.getElementById('prevMsgBtn');
-    const nextBtn = document.getElementById('nextMsgBtn');
+    conversationMessages.forEach((msg) => {
+        const color = modelColors[msg.speaker] || '#999';
+        const isVisible = isMessageVisible(msg);
+        const isSelected = selectedPoint !== null &&
+                          visualizationData.messages[selectedPoint].conversation_id === msg.conversation_id &&
+                          visualizationData.messages[selectedPoint].message_index === msg.message_index;
 
-    if (prevBtn && !prevBtn.disabled) {
-        prevBtn.addEventListener('click', () => navigateMessage(message.conversation_id, currentIndex - 1));
-    }
+        // Find the global index for this message
+        const globalIdx = visualizationData.messages.findIndex(m =>
+            m.conversation_id === msg.conversation_id &&
+            m.message_index === msg.message_index &&
+            m.speaker === msg.speaker
+        );
 
-    if (nextBtn && !nextBtn.disabled) {
-        nextBtn.addEventListener('click', () => navigateMessage(message.conversation_id, currentIndex + 1));
+        html += `
+            <div class="conversation-message ${isSelected ? 'selected' : ''} ${!isVisible ? 'filtered-out' : ''}"
+                 data-message-idx="${globalIdx}"
+                 id="msg-${globalIdx}">
+                <div class="message-header">
+                    <span class="speaker-badge" style="background-color: ${color};">
+                        ${msg.speaker}
+                    </span>
+                    <span class="message-index">Message ${msg.message_index + 1}</span>
+                </div>
+                <div class="message-text">${escapeHtml(msg.text)}</div>
+            </div>
+        `;
+    });
+
+    conversationContent.innerHTML = html;
+
+    // Add click handlers to messages
+    conversationContent.querySelectorAll('.conversation-message').forEach(msgEl => {
+        const msgIdx = parseInt(msgEl.dataset.messageIdx);
+        const msg = visualizationData.messages[msgIdx];
+
+        if (isMessageVisible(msg)) {
+            msgEl.addEventListener('click', () => {
+                selectMessage(msgIdx);
+            });
+        }
+    });
+
+    // Scroll selected message into view within the conversation container
+    if (selectedPoint !== null) {
+        const selectedEl = document.getElementById(`msg-${selectedPoint}`);
+        const conversationView = document.getElementById('conversationView');
+        if (selectedEl && conversationView) {
+            // Calculate the position relative to the conversation view
+            const containerRect = conversationView.getBoundingClientRect();
+            const elementRect = selectedEl.getBoundingClientRect();
+            const relativeTop = elementRect.top - containerRect.top;
+
+            // Scroll within the conversation view to center the selected message
+            const scrollOffset = conversationView.scrollTop + relativeTop - (conversationView.clientHeight / 2) + (elementRect.height / 2);
+            conversationView.scrollTo({ top: scrollOffset, behavior: 'smooth' });
+        }
     }
 }
 
@@ -414,26 +450,6 @@ function getConversationMessages(conversationId) {
         .sort((a, b) => a.message_index - b.message_index);
 }
 
-function navigateMessage(conversationId, targetIndex) {
-    const conversationMessages = getConversationMessages(conversationId);
-
-    if (targetIndex < 0 || targetIndex >= conversationMessages.length) return;
-
-    const targetMessage = conversationMessages[targetIndex];
-
-    // Find the message index in the full messages array
-    const fullIndex = visualizationData.messages.findIndex(m =>
-        m.conversation_id === targetMessage.conversation_id &&
-        m.message_index === targetMessage.message_index &&
-        m.speaker === targetMessage.speaker
-    );
-
-    if (fullIndex !== -1) {
-        selectedPoint = fullIndex;
-        showMessageDetails(targetMessage);
-        draw();
-    }
-}
 
 function showOnlyConversation(conversationId) {
     // Set the conversation filter
@@ -444,6 +460,13 @@ function showOnlyConversation(conversationId) {
 
     // Update legend and redraw
     updateLegend();
+
+    // Refresh conversation view if one is shown
+    if (selectedPoint !== null) {
+        const selectedMsg = visualizationData.messages[selectedPoint];
+        showConversation(selectedMsg.conversation_id);
+    }
+
     draw();
 }
 
@@ -453,6 +476,13 @@ function showAllConversations() {
 
     // Update legend and redraw
     updateLegend();
+
+    // Refresh conversation view if one is shown
+    if (selectedPoint !== null) {
+        const selectedMsg = visualizationData.messages[selectedPoint];
+        showConversation(selectedMsg.conversation_id);
+    }
+
     draw();
 }
 
