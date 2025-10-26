@@ -9,6 +9,10 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from models import ModelConfig
 from orchestrator import run_all_pairwise
 
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 
 def main():
     if len(sys.argv) < 2:
@@ -36,7 +40,8 @@ def main():
         models=models,
         initial_message=config["initial_message"],
         max_turns=config.get("max_turns", 10),
-        output_dir=config.get("output_dir", "conversations")
+        output_dir=config.get("output_dir", "conversations"),
+        end_codeword=config.get("end_codeword")
     )
 
 

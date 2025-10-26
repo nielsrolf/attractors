@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 from models import ModelConfig, Conversation
+from exporters import export_conversation
 
 load_dotenv()
 
@@ -13,7 +14,9 @@ def run_conversation(
     model_a: ModelConfig,
     model_b: ModelConfig,
     initial_message: str,
-    max_turns: int = 10
+    max_turns: int = 10,
+    end_codeword: str = None,
+    output_dir: str = "conversations"
 ) -> Conversation:
     """
     Run a conversation between two models.
@@ -87,12 +90,23 @@ def run_conversation(
 
             print(f"  [{current_model.name}] {content}")
 
+            # Export after each turn to avoid data loss
+            export_conversation(conversation, output_dir)
+
+            # Check for end codeword
+            if end_codeword and content.strip().endswith(end_codeword):
+                print(f"  [INFO] Conversation ended with codeword: {end_codeword}")
+                break
+
             # Swap models
             current_model, other_model = other_model, current_model
 
         except Exception as e:
             print(f"  [ERROR] {str(e)}")
+            # Export partial conversation on error
+            export_conversation(conversation, output_dir)
             break
 
     conversation.ended_at = datetime.now()
+    export_conversation(conversation, output_dir)  # Final export with end time
     return conversation
