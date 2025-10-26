@@ -45,7 +45,8 @@ def main():
         max_turns=config.get("max_turns", 10),
         output_dir=config.get("output_dir", "conversations"),
         end_codeword=config.get("end_codeword"),
-        conversations_per_pair=config.get("conversations_per_pair", 1)
+        conversations_per_pair=config.get("conversations_per_pair", 1),
+        max_workers=config.get("max_workers")
     )
 
 

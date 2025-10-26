@@ -3,6 +3,7 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 from datetime import datetime
+from threading import Lock
 
 from models import ModelConfig, Conversation
 from exporters import export_conversation
@@ -17,7 +18,8 @@ def run_conversation(
     max_turns: int = 10,
     end_codeword: str = None,
     output_dir: str = "conversations",
-    run_number: int = None
+    run_number: int = None,
+    print_lock: Lock = None
 ) -> Conversation:
     """
     Run a conversation between two models.
@@ -30,6 +32,7 @@ def run_conversation(
         end_codeword: Optional codeword to end conversation early
         output_dir: Directory to save conversations
         run_number: Optional run number for multiple conversations per pair
+        print_lock: Optional lock for thread-safe printing
 
     Returns:
         Completed Conversation object
@@ -92,21 +95,33 @@ def run_conversation(
                 "speaker": current_model.name
             })
 
-            print(f"  [{current_model.name}] {content}")
+            if print_lock:
+                with print_lock:
+                    print(f"  [{current_model.name}] {content[:100]}{'...' if len(content) > 100 else ''}")
+            else:
+                print(f"  [{current_model.name}] {content}")
 
             # Export after each turn to avoid data loss
             export_conversation(conversation, output_dir, run_number)
 
             # Check for end codeword
             if end_codeword and content.strip().endswith(end_codeword):
-                print(f"  [INFO] Conversation ended with codeword: {end_codeword}")
+                if print_lock:
+                    with print_lock:
+                        print(f"  [INFO] Conversation ended with codeword: {end_codeword}")
+                else:
+                    print(f"  [INFO] Conversation ended with codeword: {end_codeword}")
                 break
 
             # Swap models
             current_model, other_model = other_model, current_model
 
         except Exception as e:
-            print(f"  [ERROR] {str(e)}")
+            if print_lock:
+                with print_lock:
+                    print(f"  [ERROR] {str(e)}")
+            else:
+                print(f"  [ERROR] {str(e)}")
             # Export partial conversation on error
             export_conversation(conversation, output_dir, run_number)
             break
