@@ -1,0 +1,19 @@
+{
+  "initial_message": " ",
+  "max_turns": 6,
+  "output_dir": "conversations",
+  "models": [
+    {
+      "name": "Kimi K2",
+      "model_id": "moonshotai/kimi-k2-0905:exacto",
+      "system_prompt": "",
+      "temperature": 1
+    },
+    {
+      "name": "4o",
+      "model_id": "openai/gpt-4o-2024-05-13",
+      "system_prompt": "",
+      "temperature": 1
+    }
+  ]
+}
